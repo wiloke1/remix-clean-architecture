@@ -1,0 +1,61 @@
+{
+  "private": true,
+  "sideEffects": false,
+  "type": "module",
+  "scripts": {
+    "prestart": "pnpm i",
+    "build": "remix build",
+    "dev": "PORT=8080 remix dev --manual",
+    "start": "remix-serve ./build/index.js",
+    "typecheck": "tsc",
+    "lint": "eslint --ext .ts,.tsx app/ --quiet --fix"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "pnpm run lint",
+      "git add"
+    ]
+  },
+  "dependencies": {
+    "@remix-run/css-bundle": "^2.0.1",
+    "@remix-run/node": "^2.0.1",
+    "@remix-run/react": "^2.0.1",
+    "@remix-run/serve": "^2.0.1",
+    "immer": "^10.0.3",
+    "isbot": "^3.6.8",
+    "mongoose": "^7.6.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-frame-component": "^5.2.6",
+    "remix-auth": "^3.6.0",
+    "remix-auth-form": "^1.4.0",
+    "remix-utils": "^7.1.0",
+    "use-sync-external-store": "^1.2.0",
+    "zustand": "^4.4.4"
+  },
+  "devDependencies": {
+    "@remix-run/dev": "^2.0.1",
+    "@remix-run/eslint-config": "^2.0.1",
+    "@tailwindcss/forms": "^0.5.6",
+    "@types/react": "^18.2.20",
+    "@types/react-dom": "^18.2.7",
+    "@types/use-sync-external-store": "^0.0.5",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "add": "^2.0.6",
+    "eslint": "^8.38.0",
+    "eslint-config-airbnb-typescript": "^17.1.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-prettier": "5.0.0",
+    "husky": "^4.2.5",
+    "lint-staged": "8.1.7",
+    "prettier": "^3.0.3",
+    "prop-types": "^15.8.1",
+    "tailwindcss": "^3.3.3",
+    "typescript": "^5.1.6"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

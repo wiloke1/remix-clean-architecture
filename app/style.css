@@ -1,0 +1,23 @@
+body {
+  margin: 0;
+}
+
+[data-dnd-item-id] h2 {
+  margin: 0;
+}
+
+[data-dnd-type="before"] > div:nth-child(1) {
+  height: 10px;
+  background-color: green;
+  transition: 0.3s;
+}
+
+[data-dnd-type="after"] > div:nth-child(3) {
+  height: 10px;
+  background-color: green;
+  transition: 0.3s;
+}
+
+[data-dnd-type="inside"] > div:nth-child(2) {
+  outline: 1px solid red;
+}
