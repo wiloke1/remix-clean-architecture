@@ -6,7 +6,7 @@
 1. /application: Thư mục này chứa logic ứng dụng và use cases của bạn.
     - use-cases: Là các lớp chứa các nghiệp vụ của hệ thống. Các lớp này không được phụ thuộc vào bất kỳ một thành phần nào khác trong hệ thống. (Chú ý use-case phải là Pure Function để dễ dàng testing)
 3. /domain: Đây là phần quan trọng của ứng dụng và chứa các models, repositories và services.
-    - /entities: Định nghĩa các đối tượng cốt lõi của ứng dụng. Các đối tượng này không được phụ thuộc vào bất kỳ một thành phần nào khác trong hệ thống.
+    - /entities: Định nghĩa các đối tượng cốt lõi của ứng dụng. Các đối tượng này không được phụ thuộc vào bất kỳ một thành phần nào khác trong hệ thống. (Ta cũng có thể đặt nó là models)
     - /ports: Định nghĩa các giao diện (interfaces) cho các services, giúp bạn tạo các phiên bản cụ thể của chúng trong phân /infrastructure (Bắt buộc services phải đi theo port mà ứng dụng cung cấp để kết nối với ứng dụng).
 
 ### Adapter (Driving adapter, driven adapter), UI, utils...
@@ -20,5 +20,5 @@
 
 6. /infrastructure: Thư mục này chứa cài đặt cụ thể cho các services và dữ liệu.
     - /data: Dữ liệu mẫu hoặc mô phỏng cho phát triển và kiểm thử.
-    - /services: Cài đặt cụ thể của các repository.
+    - /services: Cài đặt cụ thể của các services (Có thể đặt thư mục là repositories).
 7. /store: Chứa trạng thái ứng dụng và quản lý trạng thái bằng Zustand, các loader, action của remix hoặc các thư viện trạng thái khác.
