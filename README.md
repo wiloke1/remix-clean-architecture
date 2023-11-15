@@ -19,6 +19,6 @@
 5. /routes: Chứa các routes của ứng dụng (Cụ thể là theo routes của remix.run).
 
 6. /infrastructure: Thư mục này chứa cài đặt cụ thể cho các services và dữ liệu.
-    - /data: Dữ liệu mẫu hoặc mô phỏng cho phát triển và kiểm thử.
+    - /data: Dữ liệu mẫu hoặc mô phỏng cho phát triển và testing.
     - /services: Cài đặt cụ thể của các services (Có thể đặt thư mục là repositories).
 7. /store: Chứa trạng thái ứng dụng và quản lý trạng thái bằng Zustand, các loader, action của remix hoặc các thư viện trạng thái khác.
