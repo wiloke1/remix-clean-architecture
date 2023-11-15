@@ -4,7 +4,7 @@
 
 ### Khu vực chính của ứng dụng
 1. /application: Thư mục này chứa logic ứng dụng và use cases của bạn.
-    - use-cases: Là các lớp chứa các nghiệp vụ của hệ thống. Các lớp này không được phụ thuộc vào bất kỳ một thành phần nào khác trong hệ thống.
+    - use-cases: Là các lớp chứa các nghiệp vụ của hệ thống. Các lớp này không được phụ thuộc vào bất kỳ một thành phần nào khác trong hệ thống. (Chú ý use-case phải là Pure Function để dễ dàng testing)
 3. /domain: Đây là phần quan trọng của ứng dụng và chứa các models, repositories và services.
     - /entities: Định nghĩa các đối tượng cốt lõi của ứng dụng. Các đối tượng này không được phụ thuộc vào bất kỳ một thành phần nào khác trong hệ thống.
     - /ports: Định nghĩa các giao diện (interfaces) cho các services, giúp bạn tạo các phiên bản cụ thể của chúng trong phân /infrastructure (Bắt buộc services phải đi theo port mà ứng dụng cung cấp để kết nối với ứng dụng).
