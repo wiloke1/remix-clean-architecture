@@ -1,9 +1,10 @@
-import { ProductsError } from '~/domain/entities/products.entity';
 import type { ProductsPort } from '~/domain/ports/products.port';
+import { readProductsUseCase } from '../read-products.use-case';
 import { delay } from '~/libs/utils/delay';
-import { productsData } from '../data/products.data';
+import { productsData } from '~/infrastructure/data/products.data';
+import { ProductsError } from '~/domain/entities/products.entity';
 
-function createProductService(): ProductsPort {
+function createProductServiceFake(): ProductsPort {
   return {
     async readProducts() {
       try {
@@ -28,4 +29,12 @@ function createProductService(): ProductsPort {
   };
 }
 
-export const productsService = createProductService();
+const productsService = createProductServiceFake();
+
+describe('Read Products Use Case', () => {
+  it('should return products', async () => {
+    const products = await readProductsUseCase(productsService);
+    const expected = productsData;
+    expect(products).to.deep.equal(expected);
+  });
+});

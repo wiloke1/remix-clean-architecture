@@ -8,7 +8,9 @@
     "dev": "PORT=8080 remix dev --manual",
     "start": "remix-serve ./build/index.js",
     "typecheck": "tsc",
-    "lint": "eslint --ext .ts,.tsx app/ --quiet --fix"
+    "lint": "eslint --ext .ts,.tsx app/ --quiet --fix",
+    "cy:open": "cypress open",
+    "cy:run": "cypress run"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
@@ -43,6 +45,8 @@
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "add": "^2.0.6",
+    "cypress": "^13.6.1",
+    "cypress-vite": "^1.5.0",
     "eslint": "^8.38.0",
     "eslint-config-airbnb-typescript": "^17.1.0",
     "eslint-config-prettier": "^9.0.0",
@@ -53,7 +57,9 @@
     "prettier": "^3.0.3",
     "prop-types": "^15.8.1",
     "tailwindcss": "^3.3.3",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "vite": "^5.0.10",
+    "vite-tsconfig-paths": "^4.2.2"
   },
   "engines": {
     "node": ">=18.0.0"
