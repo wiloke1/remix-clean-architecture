@@ -11,10 +11,8 @@ export interface ConsumerProps<DataT extends SerializeFrom<Record<string, any>>>
   children: (data: DataT) => ReactNode;
 }
 
-export interface MatchConsumerProps<DataT extends SerializeFrom<Record<string, any>>> {
-  fallback?: ReactNode;
+export interface MatchConsumerProps<DataT extends SerializeFrom<Record<string, any>>> extends ConsumerProps<DataT> {
   path: string;
-  children: (data: DataT) => ReactNode;
 }
 
 export interface RouteConsumerProps<DataT extends SerializeFrom<Record<string, any>>> extends MatchConsumerProps<DataT> {}
