@@ -1,9 +1,15 @@
 import type { LoaderFunctionArgs, SerializeFrom } from '@remix-run/node';
-import { defer, json, useLoaderData, useMatches, useRouteLoaderData } from '@remix-run/react';
-import { useMemo } from 'react';
+import { Await, defer, json, useLoaderData, useMatches, useRouteLoaderData } from '@remix-run/react';
+import type { ReactNode } from 'react';
+import { Suspense, useMemo } from 'react';
 
 type DefaultLoaderType = any;
 type Callback<DataT extends Record<string, any>> = (args: LoaderFunctionArgs) => DataT;
+
+export interface ConsumerProps<DataT extends SerializeFrom<Record<string, any>>> {
+  fallback?: ReactNode;
+  children: (data: DataT) => ReactNode;
+}
 
 function getRouteId(path: string) {
   return 'routes' + path.replace(/\//g, '.').replace(/^./g, '/');
@@ -44,11 +50,21 @@ export function createDeferLoader<DataT extends Record<string, any>>(callback: C
     return useMatchDataPrivate<Promise<SerializeFrom<DataT>>>(path);
   }
 
+  function Consumer({ fallback = null, children }: ConsumerProps<SerializeFrom<DataT>>) {
+    const data = useData();
+    return (
+      <Suspense fallback={fallback}>
+        <Await resolve={data}>{children as any}</Await>
+      </Suspense>
+    );
+  }
+
   return {
     loader,
     useData,
     useRouteData,
     useMatchData,
+    Consumer,
   };
 }
 

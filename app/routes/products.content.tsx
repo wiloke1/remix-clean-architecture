@@ -2,7 +2,7 @@ import { Await, Outlet } from '@remix-run/react';
 import type { CSSProperties } from 'react';
 import { Suspense } from 'react';
 import { Skeleton } from '~/libs/components/skeleton';
-import { productsLoader, useProducts } from '~/store/products.store';
+import { ProductsConsumer, productsLoader, useProducts } from '~/store/products.store';
 
 export { ErrorBoundary } from '~/libs/components/error-boundary';
 
@@ -28,6 +28,13 @@ export default function ProductsContent() {
             )}
           </Await>
         </Suspense>
+        <ProductsConsumer fallback={<Skeleton />}>
+          {products => (
+            <div>
+              <textarea cols={80} rows={40} defaultValue={JSON.stringify(products.products, null, 2)} />
+            </div>
+          )}
+        </ProductsConsumer>
       </div>
     </xo-grid>
   );

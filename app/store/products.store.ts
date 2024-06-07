@@ -7,6 +7,7 @@ export const {
   useData: useProducts,
   useRouteData: useRouteProducts,
   useMatchData: useMatchProducts,
+  Consumer: ProductsConsumer,
 } = createDeferLoader(() => {
   const products = readProductsUseCase(productsService);
   return products;
