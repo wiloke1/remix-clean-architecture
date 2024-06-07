@@ -5,24 +5,20 @@
   "scripts": {
     "prestart": "pnpm i",
     "build": "remix build",
-    "dev": "PORT=8080 remix dev --manual",
+    "dev": "PORT=3000 remix dev --manual",
     "start": "remix-serve ./build/index.js",
     "typecheck": "tsc",
     "lint": "eslint --ext .ts,.tsx app/ --quiet --fix",
     "cy:open": "cypress open",
-    "cy:run": "cypress run"
-  },
-  "lint-staged": {
-    "*.{ts,tsx}": [
-      "pnpm run lint",
-      "git add"
-    ]
+    "cy:run": "cypress run",
+    "docker:build": "docker compose -f docker-compose-dev.yaml up -d --build",
+    "docker:run": "docker compose -f docker-compose-dev.yaml up -d -w"
   },
   "dependencies": {
-    "@remix-run/css-bundle": "^2.0.1",
-    "@remix-run/node": "^2.0.1",
-    "@remix-run/react": "^2.0.1",
-    "@remix-run/serve": "^2.0.1",
+    "@remix-run/css-bundle": "^2.9.2",
+    "@remix-run/node": "^2.9.2",
+    "@remix-run/react": "^2.9.2",
+    "@remix-run/serve": "^2.9.2",
     "immer": "^10.0.3",
     "isbot": "^3.6.8",
     "mongoose": "^7.6.3",
@@ -36,8 +32,8 @@
     "zustand": "^4.4.4"
   },
   "devDependencies": {
-    "@remix-run/dev": "^2.0.1",
-    "@remix-run/eslint-config": "^2.0.1",
+    "@remix-run/dev": "^2.9.2",
+    "@remix-run/eslint-config": "^2.9.2",
     "@tailwindcss/forms": "^0.5.6",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
@@ -52,8 +48,6 @@
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-import": "^2.28.1",
     "eslint-plugin-prettier": "5.0.0",
-    "husky": "^4.2.5",
-    "lint-staged": "8.1.7",
     "prettier": "^3.0.3",
     "prop-types": "^15.8.1",
     "tailwindcss": "^3.3.3",

@@ -1,16 +1,14 @@
-import { ProductsContainer } from '~/containers/products/products.container';
-import { productsLoader } from '~/store/products.store';
+import { Outlet } from '@remix-run/react';
 
-export const loader = async () => {
-  return productsLoader();
-};
+export { ErrorBoundary } from '~/libs/components/error-boundary';
 
-export default function Products() {
+const ProductContent = Outlet;
+
+export default function ProductsContent() {
   return (
     <div>
-      <h1>Products</h1>
-      <p>This is the products page.</p>
-      <ProductsContainer />
+      <h2>Products</h2>
+      <ProductContent />
     </div>
   );
 }

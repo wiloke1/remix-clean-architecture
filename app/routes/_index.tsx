@@ -1,6 +1,8 @@
 import type { MetaFunction } from '@remix-run/node';
 import { useCounter } from '~/store/counter.store';
 
+export { ErrorBoundary } from '~/libs/components/error-boundary';
+
 export const meta: MetaFunction = () => {
   return [{ title: 'New Remix App' }, { name: 'description', content: 'Welcome to Remix!' }];
 };

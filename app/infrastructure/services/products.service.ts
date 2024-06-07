@@ -1,14 +1,15 @@
-import { ProductsError } from '~/domain/entities/products.entity';
+import { ProductsError } from '~/domain/errors/products.error';
 import type { ProductsPort } from '~/domain/ports/products.port';
 import { delay } from '~/libs/utils/delay';
-import { productsData } from '../data/products.data';
 
 function createProductService(): ProductsPort {
   return {
     async readProducts() {
       try {
-        await delay(200);
-        return productsData;
+        const rest = await fetch('https://impact-theme-sound.myshopify.com/products.json');
+        // Thêm delay để test
+        await delay(500);
+        return rest.json();
       } catch (error) {
         if (error instanceof Error) {
           throw new ProductsError(error);

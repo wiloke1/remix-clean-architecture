@@ -1,23 +1,42 @@
 body {
   margin: 0;
+  font-family: sans-serif;
 }
 
-[data-dnd-item-id] h2 {
-  margin: 0;
+.app-loading {
+  width: 100%;
+  height: 3px;
+  background: rgb(251, 206, 206);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 99;
+  &:after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 100%;
+    background: rgb(255, 0, 0);
+    animation: app-loading forwards 1s cubic-bezier(.25,.85,.41,.97);
+  }
 }
 
-[data-dnd-type="before"] > div:nth-child(1) {
-  height: 10px;
-  background-color: green;
-  transition: 0.3s;
+@keyframes app-loading {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 96%;
+  }
 }
 
-[data-dnd-type="after"] > div:nth-child(3) {
-  height: 10px;
-  background-color: green;
-  transition: 0.3s;
+.nav {
+  display: flex;
+  gap: 20px;
 }
 
-[data-dnd-type="inside"] > div:nth-child(2) {
-  outline: 1px solid red;
+.nav a {
+  text-decoration: none;
+  color: black;
+  font-size: 20px;
 }

@@ -3,6 +3,7 @@ import type { LinksFunction } from '@remix-run/node';
 import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration, useRouteError } from '@remix-run/react';
 import { Nav } from './libs/components/nav/nav';
 import './style.css';
+import { AppLoading } from './libs/components/app-loading';
 
 export const links: LinksFunction = () => [...(cssBundleHref ? [{ rel: 'stylesheet', href: cssBundleHref }] : [])];
 
@@ -34,11 +35,15 @@ export default function App() {
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <Meta />
         <Links />
+        <link rel="stylesheet" href="https://theme-docs.awe7.com/html/style.css?v=1717654195" />
       </head>
       <body>
-        <Nav />
-        <Outlet />
-        <ScrollRestoration />
+        <div style={{ maxWidth: 1200, margin: '50px auto' }}>
+          <AppLoading />
+          <Nav />
+          <Outlet />
+          <ScrollRestoration />
+        </div>
         <Scripts />
         <LiveReload />
       </body>
