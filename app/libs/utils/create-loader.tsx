@@ -11,6 +11,14 @@ export interface ConsumerProps<DataT extends SerializeFrom<Record<string, any>>>
   children: (data: DataT) => ReactNode;
 }
 
+export interface MatchConsumerProps<DataT extends SerializeFrom<Record<string, any>>> {
+  fallback?: ReactNode;
+  path: string;
+  children: (data: DataT) => ReactNode;
+}
+
+export interface RouteConsumerProps<DataT extends SerializeFrom<Record<string, any>>> extends MatchConsumerProps<DataT> {}
+
 function getRouteId(path: string) {
   return 'routes' + path.replace(/\//g, '.').replace(/^./g, '/');
 }
@@ -59,12 +67,32 @@ export function createDeferLoader<DataT extends Record<string, any>>(callback: C
     );
   }
 
+  function MatchConsumer({ fallback = null, path, children }: MatchConsumerProps<SerializeFrom<DataT>>) {
+    const data = useMatchData(path);
+    return (
+      <Suspense fallback={fallback}>
+        <Await resolve={data}>{children as any}</Await>
+      </Suspense>
+    );
+  }
+
+  function RouteConsumer({ fallback = null, path, children }: RouteConsumerProps<SerializeFrom<DataT>>) {
+    const data = useRouteData(path);
+    return (
+      <Suspense fallback={fallback}>
+        <Await resolve={data}>{children as any}</Await>
+      </Suspense>
+    );
+  }
+
   return {
     loader,
     useData,
     useRouteData,
     useMatchData,
     Consumer,
+    MatchConsumer,
+    RouteConsumer,
   };
 }
 
