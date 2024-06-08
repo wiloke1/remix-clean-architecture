@@ -28,8 +28,8 @@ function useDataPrivate<DataT extends SerializeFrom<Record<string, any>>>() {
 
 function useMatchDataPrivate<DataT extends SerializeFrom<Record<string, any>>>(path: string) {
   const matchingRoutes = useMatches();
-
   const route = useMemo(() => matchingRoutes.find(route => route.id === getRouteId(path)), [matchingRoutes, path]) as any;
+
   return route?.data?.data as DataT | undefined;
 }
 
