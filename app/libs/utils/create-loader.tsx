@@ -1,5 +1,5 @@
 import type { LoaderFunctionArgs, SerializeFrom } from '@remix-run/node';
-import { Await, defer, json, useLoaderData } from '@remix-run/react';
+import { Await, defer, json, useLoaderData, useNavigation } from '@remix-run/react';
 import type { ReactNode } from 'react';
 import { Suspense, useEffect, useState } from 'react';
 
@@ -20,15 +20,23 @@ export interface RouteConsumerProps<DataT extends SerializeFrom<Record<string, a
 function useDataPrivate<DataT extends SerializeFrom<Record<string, any>>>(callback: Callback<DataT>, prevData: DataT | null, isJson = false) {
   const { data, args } = useLoaderData<DefaultLoaderType>();
   const [dataState, setDataState] = useState<DataT>(prevData ?? data);
+  const [needFetch, setNeedFetch] = useState(false);
+  const navigation = useNavigation();
 
   useEffect(() => {
-    if (isJson) {
-      callback(args).then(setDataState).catch(console.error);
-    } else {
-      setDataState(callback(args));
+    setNeedFetch(navigation.state !== 'loading');
+  }, [navigation.state]);
+
+  useEffect(() => {
+    if (needFetch) {
+      if (isJson) {
+        callback(args).then(setDataState).catch(console.error);
+      } else {
+        setDataState(callback(args));
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [needFetch, args]);
 
   return dataState as DataT;
 }
