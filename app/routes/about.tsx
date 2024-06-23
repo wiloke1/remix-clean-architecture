@@ -9,7 +9,7 @@ export default function About() {
       <br />
       <nav className="nav" style={{ fontSize: 16 }}>
         <Link to={`${path.about}/id_success`}>Success</Link>
-        <Link to={`${path.about}/id_sucess2`}>Success 2</Link>
+        <Link to={`${path.about}/id_success2`}>Success 2</Link>
       </nav>
       <Outlet />
     </div>
