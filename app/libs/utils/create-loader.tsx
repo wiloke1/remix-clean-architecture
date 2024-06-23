@@ -41,6 +41,10 @@ function useDataPrivate<DataT extends SerializeFrom<Record<string, any>>>(callba
   const navigation = useNavigation();
 
   useEffect(() => {
+    setDataState(data);
+  }, [data]);
+
+  useEffect(() => {
     setNeedFetch(navigation.state !== 'loading' && !!prevLocationFromNavigation);
     prevLocationFromNavigation = navigation.location;
   }, [navigation]);
@@ -55,10 +59,6 @@ function useDataPrivate<DataT extends SerializeFrom<Record<string, any>>>(callba
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [needFetch, args]);
-
-  useEffect(() => {
-    setDataState(data);
-  }, [data]);
 
   useEffect(() => {
     if (args) {
