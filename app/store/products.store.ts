@@ -5,8 +5,6 @@ import { createDeferLoader } from '~/libs/utils/create-loader';
 export const {
   loader: productsLoader,
   useData: useProducts,
-  useRouteData: useRouteProducts,
-  useMatchData: useMatchProducts,
   Consumer: ProductsConsumer,
 } = createDeferLoader(() => {
   const products = readProductsUseCase(productsService);

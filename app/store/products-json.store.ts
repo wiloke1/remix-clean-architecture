@@ -5,7 +5,7 @@ import { createJsonLoader } from '~/libs/utils/create-loader';
 export const {
   loader: productsJsonLoader,
   useData: useProductsJson,
-  useRouteData: useRouteJsonProducts,
+  useCacheData: useProductsCacheJson,
 } = createJsonLoader(async ({ params }) => {
   const products = await readProductsUseCase(productsService);
   return { products, params };

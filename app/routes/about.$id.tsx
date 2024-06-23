@@ -10,7 +10,7 @@ export default function About() {
   return (
     <div>
       <h1>About {params.id}</h1>
-      <textarea cols={80} rows={40} defaultValue={JSON.stringify(products, null, 2)} />
+      <textarea cols={80} rows={40} value={JSON.stringify(products, null, 2)} />
     </div>
   );
 }

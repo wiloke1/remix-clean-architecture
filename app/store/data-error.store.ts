@@ -1,12 +1,11 @@
-import { defer } from '@remix-run/node';
-import { useLoaderData, useRouteLoaderData } from '@remix-run/react';
+import { json, useLoaderData, useRouteLoaderData } from '@remix-run/react';
 import { readDataErrorUseCase } from '~/application/products/read-data-error.use-case';
 import { dataErrorService } from '~/infrastructure/services/data-error.service';
 import { path } from '~/route-config';
 
 export async function dataErrorLoader() {
-  const dataError = readDataErrorUseCase(dataErrorService);
-  return defer({ dataError });
+  const dataError = await readDataErrorUseCase(dataErrorService);
+  return json({ dataError });
 }
 
 export function useDataError() {
