@@ -1,7 +1,7 @@
 import type { LoaderFunctionArgs, SerializeFrom } from '@remix-run/node';
-import { Await, defer, json, useLoaderData, useMatches, useRouteLoaderData } from '@remix-run/react';
+import { Await, defer, json, useLoaderData } from '@remix-run/react';
 import type { ReactNode } from 'react';
-import { Suspense, useMemo } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 
 type DefaultLoaderType = any;
 type Callback<DataT extends Record<string, any>> = (args: LoaderFunctionArgs) => DataT;
@@ -17,105 +17,120 @@ export interface MatchConsumerProps<DataT extends SerializeFrom<Record<string, a
 
 export interface RouteConsumerProps<DataT extends SerializeFrom<Record<string, any>>> extends MatchConsumerProps<DataT> {}
 
-function getRouteId(path: string) {
-  return 'routes' + path.replace(/\//g, '.').replace(/^./g, '/');
+function useDataPrivate<DataT extends SerializeFrom<Record<string, any>>>(callback: Callback<DataT>, prevData: DataT | null, isJson = false) {
+  const { data, args } = useLoaderData<DefaultLoaderType>();
+  const [dataState, setDataState] = useState<DataT>(prevData ?? data);
+
+  useEffect(() => {
+    if (isJson) {
+      callback(args).then(setDataState).catch(console.error);
+    } else {
+      setDataState(callback(args));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return dataState as DataT;
 }
 
-function useDataPrivate<DataT extends SerializeFrom<Record<string, any>>>() {
-  const { data } = useLoaderData<DefaultLoaderType>();
-  return data as DataT;
-}
+function useConsumerDataPrivate<DataT extends SerializeFrom<Record<string, any>>>(callback: Callback<DataT>, prevData: DataT | null) {
+  const { data, args } = useLoaderData<DefaultLoaderType>();
+  const [dataState, setDataState] = useState<DataT>(prevData ?? data);
 
-function useMatchDataPrivate<DataT extends SerializeFrom<Record<string, any>>>(path: string) {
-  const matchingRoutes = useMatches();
-  const route = useMemo(() => matchingRoutes.find(route => route.id === getRouteId(path)), [matchingRoutes, path]) as any;
+  useEffect(() => {
+    if (callback) {
+      setDataState(callback(args));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  return route?.data?.data as DataT | undefined;
-}
-
-function useRouteDataPrivate<DataT extends SerializeFrom<Record<string, any>>>(path: string) {
-  const data = useRouteLoaderData<DefaultLoaderType>(getRouteId(path));
-  return data?.data as DataT | undefined;
+  return { data: dataState, isLoading: !args };
 }
 
 export function createDeferLoader<DataT extends Record<string, any>>(callback: Callback<DataT>, init?: number | ResponseInit) {
+  let cache: DataT | null = null;
+
   function loader(args: LoaderFunctionArgs) {
+    if (cache) {
+      return defer({ data: cache, args }, init);
+    }
     const data = callback(args);
+    cache = data;
     return defer({ data }, init);
   }
 
   function useData() {
-    return useDataPrivate<Promise<SerializeFrom<DataT>>>();
+    const data = useDataPrivate<Promise<SerializeFrom<DataT>>>(callback as any, cache as any);
+    cache = data as any as DataT;
+    return data;
   }
 
-  function useRouteData(path: string) {
-    return useRouteDataPrivate<Promise<SerializeFrom<DataT>>>(path);
+  function useConsumerData() {
+    const data = useConsumerDataPrivate<Promise<SerializeFrom<DataT>>>(callback as any, cache as any);
+    cache = data.data as any as DataT;
+    return data;
   }
 
-  function useMatchData(path: string) {
-    return useMatchDataPrivate<Promise<SerializeFrom<DataT>>>(path);
+  function useCacheData() {
+    return cache;
   }
 
   function Consumer({ fallback = null, children }: ConsumerProps<SerializeFrom<DataT>>) {
-    const data = useData();
-    return (
-      <Suspense fallback={fallback}>
-        <Await resolve={data}>{children as any}</Await>
-      </Suspense>
-    );
+    const { data, isLoading } = useConsumerData();
+
+    if (isLoading) {
+      return (
+        <Suspense fallback={fallback}>
+          <Await resolve={data}>{children as any}</Await>
+        </Suspense>
+      );
+    }
+
+    return <Await resolve={data}>{children as any}</Await>;
   }
 
-  function MatchConsumer({ fallback = null, path, children }: MatchConsumerProps<SerializeFrom<DataT>>) {
-    const data = useMatchData(path);
-    return (
-      <Suspense fallback={fallback}>
-        <Await resolve={data}>{children as any}</Await>
-      </Suspense>
-    );
-  }
+  function CacheConsumer({ children }: ConsumerProps<SerializeFrom<DataT>>) {
+    if (!cache) {
+      return null;
+    }
 
-  function RouteConsumer({ fallback = null, path, children }: RouteConsumerProps<SerializeFrom<DataT>>) {
-    const data = useRouteData(path);
-    return (
-      <Suspense fallback={fallback}>
-        <Await resolve={data}>{children as any}</Await>
-      </Suspense>
-    );
+    return <Await resolve={cache}>{children as any}</Await>;
   }
 
   return {
     loader,
     useData,
-    useRouteData,
-    useMatchData,
+    useCacheData,
     Consumer,
-    MatchConsumer,
-    RouteConsumer,
+    CacheConsumer,
   };
 }
 
 export function createJsonLoader<DataT extends Record<string, any>>(callback: Callback<Promise<DataT>>, init?: number | ResponseInit) {
+  let cache: DataT | null = null;
+
   async function loader(args: LoaderFunctionArgs) {
+    if (cache) {
+      return json({ data: cache }, init);
+    }
     const data = await callback(args);
+    cache = data;
     return json({ data }, init);
   }
 
   function useData() {
-    return useDataPrivate<SerializeFrom<DataT>>();
+    const data = useDataPrivate<SerializeFrom<DataT>>(callback as any, cache as any, true);
+    cache = data as any as DataT;
+    return data;
   }
 
-  function useRouteData(path: string) {
-    return useRouteDataPrivate<SerializeFrom<DataT>>(path);
-  }
-
-  function useMatchData(path: string) {
-    return useMatchDataPrivate<SerializeFrom<DataT>>(path);
+  function useCacheData() {
+    return cache;
   }
 
   return {
     loader,
     useData,
-    useRouteData,
-    useMatchData,
+    useCacheData,
   };
 }
