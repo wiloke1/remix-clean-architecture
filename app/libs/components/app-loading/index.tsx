@@ -1,12 +1,10 @@
 import { useNavigation } from '@remix-run/react';
 import type { FC } from 'react';
-import { deferredPaths } from '~/route-config';
 
 function useIsLoading() {
   const navigation = useNavigation();
-  const pathName = navigation.location?.pathname ?? '';
 
-  return navigation.state === 'loading' && deferredPaths.some(path => pathName.startsWith(path));
+  return navigation.state === 'loading';
 }
 
 export const AppLoading: FC = () => {

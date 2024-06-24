@@ -44,136 +44,54 @@ class Cache {
   }
 }
 
-let prevLocationFromNavigation: Location | undefined;
-
-function useDataPrivate<DataT extends SerializeFrom<Record<string, any>>>(
-  callback: Callback<DataT>,
-  cache: Cache,
-  isJson = false,
-): { data: DataT; args: LoaderFunctionArgs; hasLoading: boolean } {
-  const { data, args, hasLoading = true } = useLoaderData<DefaultLoaderType>();
-  const [dataState, setDataState] = useState<DataT>(cache.get(args) ?? data);
-  const [needFetch, setNeedFetch] = useState(false);
-  const navigation = useNavigation();
-
-  useEffect(() => {
-    setDataState(data);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data]);
-
-  useEffect(() => {
-    setNeedFetch(navigation.state !== 'loading' && !!prevLocationFromNavigation);
-    prevLocationFromNavigation = navigation.location;
-  }, [navigation]);
-
-  useEffect(() => {
-    if (needFetch && args) {
-      if (isJson) {
-        callback(args).then(setDataState).catch(console.error);
-      } else {
-        setDataState(callback(args));
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [needFetch, args]);
-
-  useEffect(() => {
-    if (args) {
-      cache.set(args, dataState);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataState, args]);
-
-  return { data: dataState, args, hasLoading };
-}
-
-let prevLocationFromNavigation2: Location | undefined;
-
-function useCacheDataPrivate<DataT extends SerializeFrom<Record<string, any>>>(cache: Cache) {
-  const { args } = useLoaderData<DefaultLoaderType>();
-  const [data, setDataState] = useState<DataT>(cache.get(args) as DataT);
-  const [observed, setObserved] = useState(false);
-  const navigation = useNavigation();
-
-  useEffect(() => {
-    if (observed) {
-      setDataState(cache.get(args) as DataT);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [observed, args]);
-
-  useEffect(() => {
-    setObserved(navigation.state !== 'loading' && !!prevLocationFromNavigation2);
-    prevLocationFromNavigation2 = navigation.location;
-  }, [navigation]);
-
-  return data;
-}
-
 export function createDeferLoader<DataT extends Record<string, any>>(callback: Callback<DataT>, init?: number | ResponseInit) {
   let cache = new Cache();
 
   function loader(args: LoaderFunctionArgs) {
-    if (cache.has(args)) {
-      return defer({ data: cache.get(args), args, hasLoading: false }, init);
-    }
     const data = callback(args);
-    cache.set(args, data);
     return defer({ data, args }, init);
   }
 
+  function useDataPrivate<DataT extends SerializeFrom<Record<string, any>>>(): { data: DataT; args: LoaderFunctionArgs } {
+    const { data, args } = useLoaderData<DefaultLoaderType>();
+    const [dataState, setDataState] = useState<DataT>(cache.get(args) ?? data);
+
+    useEffect(() => {
+      setDataState(data);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [data]);
+
+    useEffect(() => {
+      if (args) {
+        cache.set(args, dataState);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [dataState, args]);
+
+    return { data: dataState, args };
+  }
+
   function useData() {
-    const { data } = useDataPrivate<Promise<SerializeFrom<DataT>>>(callback as any, cache, false);
+    const { data } = useDataPrivate<Promise<SerializeFrom<DataT>>>();
     return data;
-  }
-
-  function useConsumerData() {
-    const data = useDataPrivate<Promise<SerializeFrom<DataT>>>(callback as any, cache, false);
-    return data;
-  }
-
-  function useCacheData() {
-    const data = useCacheDataPrivate<Promise<SerializeFrom<DataT>>>(cache);
-    return data;
-  }
-
-  function clearCache() {
-    cache.clear();
   }
 
   function Consumer({ fallback = null, children }: ConsumerProps<SerializeFrom<DataT>>) {
-    const { data, hasLoading } = useConsumerData();
+    const { data, args } = useDataPrivate<Promise<SerializeFrom<DataT>>>();
 
-    if (hasLoading) {
-      return (
-        <Suspense fallback={fallback}>
-          <Await resolve={data}>{children as any}</Await>
-        </Suspense>
-      );
-    }
+    const content = <Await resolve={data}>{children as any}</Await>;
 
-    return <Await resolve={data}>{children as any}</Await>;
-  }
-
-  function CacheConsumer({ children }: ConsumerProps<SerializeFrom<DataT>>) {
-    const cache = useCacheData();
-
-    if (!cache) {
-      return null;
-    }
-
-    return <Await resolve={cache}>{children as any}</Await>;
+    return <Suspense fallback={cache.has(args) ? content : fallback}>{content}</Suspense>;
   }
 
   return {
     loader,
     useData,
-    useCacheData,
-    clearCache,
     Consumer,
-    CacheConsumer,
   };
 }
+
+let prevLocationFromNavigation: Location | undefined;
 
 export function createJsonLoader<DataT extends Record<string, any>>(callback: Callback<Promise<DataT>>, init?: number | ResponseInit) {
   let cache = new Cache();
@@ -187,24 +105,53 @@ export function createJsonLoader<DataT extends Record<string, any>>(callback: Ca
     return json({ data, args }, init);
   }
 
+  function useDataPrivate<DataT extends SerializeFrom<Record<string, any>>>(
+    callback: Callback<DataT>,
+    isJson = false,
+  ): { data: DataT; args: LoaderFunctionArgs; hasLoading: boolean } {
+    const { data, args, hasLoading = true } = useLoaderData<DefaultLoaderType>();
+    const [dataState, setDataState] = useState<DataT>(cache.get(args) ?? data);
+    const [needFetch, setNeedFetch] = useState(false);
+    const navigation = useNavigation();
+
+    useEffect(() => {
+      setDataState(data);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [data]);
+
+    useEffect(() => {
+      setNeedFetch(navigation.state !== 'loading' && !!prevLocationFromNavigation);
+      prevLocationFromNavigation = navigation.location;
+    }, [navigation]);
+
+    useEffect(() => {
+      if (needFetch && args) {
+        if (isJson) {
+          callback(args).then(setDataState).catch(console.error);
+        } else {
+          setDataState(callback(args));
+        }
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [needFetch, args]);
+
+    useEffect(() => {
+      if (args) {
+        cache.set(args, dataState);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [dataState, args]);
+
+    return { data: dataState, args, hasLoading };
+  }
+
   function useData() {
-    const { data } = useDataPrivate<SerializeFrom<DataT>>(callback as any, cache, true);
+    const { data } = useDataPrivate<SerializeFrom<DataT>>(callback as any, true);
     return data;
-  }
-
-  function useCacheData() {
-    const data = useCacheDataPrivate<SerializeFrom<DataT>>(cache);
-    return data;
-  }
-
-  function clearCache() {
-    cache.clear();
   }
 
   return {
     loader,
     useData,
-    useCacheData,
-    clearCache,
   };
 }
