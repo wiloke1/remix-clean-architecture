@@ -91,7 +91,7 @@ let prevLocationFromNavigation2: Location | undefined;
 
 function useCacheDataPrivate<DataT extends SerializeFrom<Record<string, any>>>(cache: Cache) {
   const { args } = useLoaderData<DefaultLoaderType>();
-  const [data, setDataState] = useState<DataT | null>(null);
+  const [data, setDataState] = useState<DataT>(cache.get(args) as DataT);
   const [observed, setObserved] = useState(false);
   const navigation = useNavigation();
 
@@ -156,6 +156,8 @@ export function createDeferLoader<DataT extends Record<string, any>>(callback: C
   }
 
   function CacheConsumer({ children }: ConsumerProps<SerializeFrom<DataT>>) {
+    const cache = useCacheData();
+
     if (!cache) {
       return null;
     }
