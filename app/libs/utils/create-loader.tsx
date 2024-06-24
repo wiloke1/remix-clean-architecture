@@ -57,7 +57,7 @@ function useDataPrivate<DataT extends SerializeFrom<Record<string, any>>>(
   const navigation = useNavigation();
 
   useEffect(() => {
-    setDataState(cache.get(args) ?? data);
+    setDataState(data);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
