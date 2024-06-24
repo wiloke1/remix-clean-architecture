@@ -6,9 +6,9 @@ export const {
   loader: productsJsonLoader,
   useData: useProductsJson,
   useCacheData: useProductsCacheJson,
-} = createJsonLoader(async ({ params }) => {
+} = createJsonLoader(async args => {
   const products = await readProductsUseCase(productsService);
-  return { products, params };
+  return { products, params: args.params };
 });
 
 // DƯỚI ĐÂY LÀ VIẾT KIỂU KHÔNG CÓ createJsonLoader

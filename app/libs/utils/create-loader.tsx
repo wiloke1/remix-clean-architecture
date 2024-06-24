@@ -18,30 +18,47 @@ export interface MatchConsumerProps<DataT extends SerializeFrom<Record<string, a
 
 export interface RouteConsumerProps<DataT extends SerializeFrom<Record<string, any>>> extends MatchConsumerProps<DataT> {}
 
-class Cache extends Map {
+class Cache {
+  private cache: Record<string, any> = {};
+
+  private defaultId = { ___CACHE___: true };
+
   public get<DataT extends Record<string, any>>(args: LoaderFunctionArgs) {
-    return super.get(JSON.stringify(args)) as DataT;
+    return this.cache?.[JSON.stringify(args?.params ?? this.defaultId)] as DataT;
   }
 
   public set<DataT extends Record<string, any>>(args: LoaderFunctionArgs, data: DataT) {
-    return super.set(JSON.stringify(args), data);
+    this.cache[JSON.stringify(args?.params ?? this.defaultId)] = data;
   }
 
   public has(args: LoaderFunctionArgs) {
-    return super.has(JSON.stringify(args));
+    return !!this.get(args);
+  }
+
+  public getAll() {
+    return this.cache;
+  }
+
+  public clear() {
+    this.cache = {};
   }
 }
 
 let prevLocationFromNavigation: Location | undefined;
 
-function useDataPrivate<DataT extends SerializeFrom<Record<string, any>>>(callback: Callback<DataT>, cache: Cache, isJson = false) {
-  const { data, args } = useLoaderData<DefaultLoaderType>();
+function useDataPrivate<DataT extends SerializeFrom<Record<string, any>>>(
+  callback: Callback<DataT>,
+  cache: Cache,
+  isJson = false,
+): { data: DataT; args: LoaderFunctionArgs; hasLoading: boolean } {
+  const { data, args, hasLoading = true } = useLoaderData<DefaultLoaderType>();
   const [dataState, setDataState] = useState<DataT>(cache.get(args) ?? data);
   const [needFetch, setNeedFetch] = useState(false);
   const navigation = useNavigation();
 
   useEffect(() => {
-    setDataState(data);
+    setDataState(cache.get(args) ?? data);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
   useEffect(() => {
@@ -67,7 +84,30 @@ function useDataPrivate<DataT extends SerializeFrom<Record<string, any>>>(callba
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataState, args]);
 
-  return { data: dataState, args };
+  return { data: dataState, args, hasLoading };
+}
+
+let prevLocationFromNavigation2: Location | undefined;
+
+function useCacheDataPrivate<DataT extends SerializeFrom<Record<string, any>>>(cache: Cache) {
+  const { args } = useLoaderData<DefaultLoaderType>();
+  const [data, setDataState] = useState<DataT | null>(null);
+  const [observed, setObserved] = useState(false);
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    if (observed) {
+      setDataState(cache.get(args) as DataT);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [observed, args]);
+
+  useEffect(() => {
+    setObserved(navigation.state !== 'loading' && !!prevLocationFromNavigation2);
+    prevLocationFromNavigation2 = navigation.location;
+  }, [navigation]);
+
+  return data;
 }
 
 export function createDeferLoader<DataT extends Record<string, any>>(callback: Callback<DataT>, init?: number | ResponseInit) {
@@ -75,25 +115,26 @@ export function createDeferLoader<DataT extends Record<string, any>>(callback: C
 
   function loader(args: LoaderFunctionArgs) {
     if (cache.has(args)) {
-      return defer({ data: cache.get(args), args }, init);
+      return defer({ data: cache.get(args), args, hasLoading: false }, init);
     }
     const data = callback(args);
     cache.set(args, data);
-    return defer({ data }, init);
+    return defer({ data, args }, init);
   }
 
   function useData() {
-    const { data } = useDataPrivate<Promise<SerializeFrom<DataT>>>(callback as any, cache as any);
+    const { data } = useDataPrivate<Promise<SerializeFrom<DataT>>>(callback as any, cache, false);
     return data;
   }
 
   function useConsumerData() {
-    const data = useDataPrivate<Promise<SerializeFrom<DataT>>>(callback as any, cache);
+    const data = useDataPrivate<Promise<SerializeFrom<DataT>>>(callback as any, cache, false);
     return data;
   }
 
   function useCacheData() {
-    return cache;
+    const data = useCacheDataPrivate<Promise<SerializeFrom<DataT>>>(cache);
+    return data;
   }
 
   function clearCache() {
@@ -101,8 +142,7 @@ export function createDeferLoader<DataT extends Record<string, any>>(callback: C
   }
 
   function Consumer({ fallback = null, children }: ConsumerProps<SerializeFrom<DataT>>) {
-    const { data, args } = useConsumerData();
-    const hasLoading = !args;
+    const { data, hasLoading } = useConsumerData();
 
     if (hasLoading) {
       return (
@@ -138,11 +178,11 @@ export function createJsonLoader<DataT extends Record<string, any>>(callback: Ca
 
   async function loader(args: LoaderFunctionArgs) {
     if (cache.has(args)) {
-      return json({ data: cache.get(args), args }, init);
+      return json({ data: cache.get(args), args, hasLoading: false }, init);
     }
     const data = await callback(args);
     cache.set(args, data);
-    return json({ data }, init);
+    return json({ data, args }, init);
   }
 
   function useData() {
@@ -151,7 +191,8 @@ export function createJsonLoader<DataT extends Record<string, any>>(callback: Ca
   }
 
   function useCacheData() {
-    return cache;
+    const data = useCacheDataPrivate<SerializeFrom<DataT>>(cache);
+    return data;
   }
 
   function clearCache() {
