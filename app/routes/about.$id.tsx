@@ -1,16 +1,24 @@
-import { productsJsonLoader, useProductsJson } from '~/store/products-json.store';
+import { Skeleton } from '~/libs/components/skeleton';
+import { ProductsConsumer, productsLoader } from '~/store/products.store';
 
 export { ErrorBoundary } from '~/libs/components/error-boundary';
 
-export const loader = productsJsonLoader;
+export const loader = productsLoader;
 
 export default function About() {
-  const { products, params } = useProductsJson();
-
   return (
     <div>
-      <h1>About {params.id}</h1>
-      <textarea cols={80} rows={40} value={JSON.stringify(products, null, 2)} />
+      <h1>About</h1>
+      <ProductsConsumer fallback={<Skeleton />}>
+        {products => {
+          return (
+            <>
+              {/* {products.params.id} */}
+              <textarea cols={80} rows={40} value={JSON.stringify(products, null, 2)} />
+            </>
+          );
+        }}
+      </ProductsConsumer>
     </div>
   );
 }

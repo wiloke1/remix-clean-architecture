@@ -12,12 +12,6 @@ export interface ConsumerProps<DataT extends SerializeFrom<Record<string, any>>>
   children: (data: DataT) => ReactNode;
 }
 
-export interface MatchConsumerProps<DataT extends SerializeFrom<Record<string, any>>> extends ConsumerProps<DataT> {
-  path: string;
-}
-
-export interface RouteConsumerProps<DataT extends SerializeFrom<Record<string, any>>> extends MatchConsumerProps<DataT> {}
-
 class Cache {
   private cache: Record<string, any> = {};
 
