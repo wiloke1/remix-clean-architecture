@@ -11,12 +11,7 @@ export default function About() {
       <h1>About</h1>
       <ProductsConsumer fallback={<Skeleton />}>
         {products => {
-          return (
-            <>
-              {/* {products.params.id} */}
-              <textarea cols={80} rows={40} value={JSON.stringify(products, null, 2)} />
-            </>
-          );
+          return <textarea cols={80} rows={40} value={JSON.stringify(products, null, 2)} />;
         }}
       </ProductsConsumer>
     </div>
